@@ -39,5 +39,6 @@ app-example
 
 config.ts
 
-android
 ios
+
+android/app/build
