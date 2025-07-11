@@ -26,7 +26,7 @@ export default function OTPVerify() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [isTimeExpired, setIsTimeExpired] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60 * 3);
+  const [timeLeft, setTimeLeft] = useState(60 * 5);
   const [isIndicator, setIsIndicator] = useState(false);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function OTPVerify() {
                       preScreen: "otp_verify",
                       toggleBtn: "edit",
                       name: data?.name,
-                      email: data?.email,
+                      email: data?.email || data?.userEmail,
                       phone: data?.phone,
                       password: data?.password,
                       isTerms: data?.isTerms,
@@ -112,11 +112,12 @@ export default function OTPVerify() {
                 setIsIndicator(true);
                 let res;
                 if (params?.preScreen === "signup") {
-                  const sign = (await AsyncStorage.getItem("user_signup")) || "";
+                  const sign =
+                    (await AsyncStorage.getItem("user_signup")) || "";
                   const data = JSON.parse(sign);
                   const payload = {
                     name: data?.name,
-                    email: data?.email,
+                    email: data?.email || data?.userEmail,
                     phone: data?.phone,
                     password: data?.password,
                     fcm_token: "eEwFK5JhQzCYjXQMb0jzLN:APA91bFq3",
@@ -125,11 +126,25 @@ export default function OTPVerify() {
                   res = await postSignup(payload);
                   await AsyncStorage.removeItem("user_signup");
                 } else if (params?.preScreen === "forgot_password") {
-                  router.push({
-                    pathname: "/update_password",
-                    params: { ...params, otp: text },
-                  });
-                  return;
+                  const payload = {
+                    email: params?.email || params?.userEmail,
+                    otp: text,
+                    action: "reset_password",
+                  };
+                  res = await postSignup(payload);
+                  if (res?.status === 200) {
+                    router.push({
+                      pathname: "/update_password",
+                      params: {
+                        ...params,
+                        otp: text,
+                        action: "reset_password",
+                      },
+                    });
+                    return;
+                  }
+                  showToast("error", res?.msg);
+                  return
                 }
                 if (res?.statusCode === 400) {
                   showToast("error", res?.message);

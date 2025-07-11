@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "gps-tracking",
-    "slug": "gps-tracking",
+    "name": "geopunch",
+    "slug": "geopunch",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

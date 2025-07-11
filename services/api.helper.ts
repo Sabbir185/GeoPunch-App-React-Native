@@ -27,7 +27,7 @@ export const verifyAccount = (data: ApiData) => post('/auth/verify-identifier', 
 
 // OTP Related (Forgot Password)
 export const sendSignUpOtp = (data: ApiData) => post('/auth/signup/otp', data);
-export const otpForgetPassword = (data: ApiData) => post('/auth/forget-password', data);
+export const otpForgetPassword = (data: ApiData) => post('/auth/otp', data);
 export const resetPassword = (data: ApiData) => post('/auth/reset-password', data);
 export const changePassword = (data: ApiData) => post('/auth/change-password', data);
 

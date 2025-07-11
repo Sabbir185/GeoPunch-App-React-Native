@@ -60,14 +60,15 @@ export default function ForgotPassword() {
     try {
       setIsIndicator(true);
       const payload = {
-        emailOrPhone: toggleBtn === "email" ? userEmail : formattedValue,
+        email: toggleBtn === "email" ? userEmail : formattedValue,
+        action: "reset_password"
       };
       const res = await otpForgetPassword(payload);
-      if (res?.statusCode === 404 || res?.statusCode === 400) {
-        showToast("error", res?.message);
+      if (res?.status !== 200) {
+        showToast("error", res?.mag);
         return;
       } else {
-        showToast("success", res?.message || "OTP sent successfully");
+        showToast("success", res?.mag || "OTP sent successfully");
         router.push({
           pathname: "/otp_verify",
           params: {
@@ -82,7 +83,7 @@ export default function ForgotPassword() {
       if (axios.isAxiosError(error)) {
         showToast(
           "error",
-          error.response?.data?.message ||
+          error.response?.data?.msg ||
             "OTP verification failed, Please try again."
         );
       } else {
