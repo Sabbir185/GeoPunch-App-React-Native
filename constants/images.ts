@@ -5,7 +5,6 @@ export const images = {
   fingerPrint: require("@/assets/images/fingerPrint.png"),
   profile: require("@/assets/images/user.png"),
   location: require("@/assets/images/location.png"),
-  durationCircle: require("@/assets/images/durationCircle.png"),
   timer: require("@/assets/images/timer.png"),
   checkedIn: require("@/assets/images/checkedIn.png"),
   checkedOut: require("@/assets/images/checkedOut.png"),

@@ -23,14 +23,14 @@
       "bundleIdentifier": "bd.com.appstick.gpstracking"
     },
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/splash2.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F27243"
+      "backgroundColor": "#ffffff"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#F27243"
+        "backgroundColor": "#ffffff"
       },
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -51,9 +51,9 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash.png",
+          "image": "./assets/splash2.png",
           "resizeMode": "contain",
-          "backgroundColor": "#F27243"
+          "backgroundColor": "#ffffff"
         }
       ],
       [
