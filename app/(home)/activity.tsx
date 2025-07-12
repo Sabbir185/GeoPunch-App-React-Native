@@ -41,12 +41,12 @@ export default function Activity() {
 
   const fetchActivities = async () => {
     try {
-      const attendance = await fetchAttendanceLogs({
+      const res = await fetchAttendanceLogs({
         year: filter.year,
         month: filter.month,
       });
-      if (attendance?.logs) {
-        setActivities(attendance.logs);
+      if (res?.data) {
+        setActivities(res?.data);
       }
     } catch (error) {
       console.log(error);
@@ -165,13 +165,13 @@ export default function Activity() {
             renderItem={({ item }: { item: any }) => (
               <ActivityCard
                 date={dayjs(item.date).format("MMMM D, YYYY")}
-                location={item?.checkInAddress}
+                location={item?.checkedInPlace?.address}
                 checkIn={
-                  item?.checkIn ? dayjs(item.checkIn).format("hh:mm A") : "N/A"
+                  item?.checkedInTime ? dayjs(item.checkedInTime).format("hh:mm A") : "N/A"
                 }
                 checkOut={
-                  item?.checkOut
-                    ? dayjs(item.checkOut).format("hh:mm A")
+                  item?.checkedOutTime
+                    ? dayjs(item.checkedOutTime).format("hh:mm A")
                     : "N/A"
                 }
               />

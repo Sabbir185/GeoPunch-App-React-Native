@@ -39,7 +39,6 @@ export const fetchTermsConditions = (data?: ApiData) => get('/settings/terms-con
 export const requestAutoAttendance = (data: ApiData) => post('/attendance/auto-check', data);
 export const requestManualAttendance = (data: ApiData) => post('/attendance/manual-check', data);
 export const fetchAttendanceStatus = (data?: ApiData) => get('/attendance/status', data);
-export const fetchAttendanceLogs = (data?: ApiData) => get('/attendance/logs', data);
 export const fetchAttendanceSummary = (data?: ApiData) => get('/attendance/summary', data);
 
 // check in and out
@@ -48,3 +47,5 @@ export const submitCheckOut = (data: ApiData) => patch('/check/out', data);
 
 export const fetchPlaceOfPresence = (data?: ApiData) => get('/place-of-presence/all', data);
 export const updatePlaceOfPresence = (data?: ApiData) => patch('/place-of-presence/update', data);
+
+export const fetchAttendanceLogs = (data?: ApiData) => get('/activity', data);
