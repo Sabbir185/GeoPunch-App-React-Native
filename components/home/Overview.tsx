@@ -1,8 +1,16 @@
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import React from "react";
 import { Fonts } from "@/constants/Fonts";
 import { Colors } from "@/constants/Colors";
 import LoadingOverlay from "../common/LoadingOverlay";
+import { updatePlaceOfPresence } from "@/services/api.helper";
+import { showToast } from "@/services/toastConfig";
 
 interface ItemProps {
   name: string;
@@ -12,22 +20,73 @@ interface ItemProps {
 interface IProps {
   mostUsedItems: ItemProps[];
   additionalItems: ItemProps[];
+  fetchUserProfile: () => void;
+  user?: any;
 }
 
-export default function Overview({ mostUsedItems, additionalItems }: IProps) {
-  const handlePress = (item: ItemProps) => {
-    console.log("Pressed:", item.name, "ID:", item.id);
-    // Handle button press here
+export default function Overview({
+  mostUsedItems,
+  additionalItems,
+  fetchUserProfile,
+  user,
+}: IProps) {
+  const [activityLoader, setActivityLoader] = React.useState(false);
+  const [currentId, setCurrentId] = React.useState<
+    undefined | number | string
+  >();
+
+  const handlePress = async (item: ItemProps) => {
+    // console.log("Pressed:", item.name, "ID:", item.id);
+    setCurrentId(item.id);
+    setActivityLoader(true);
+    try {
+      const response = await updatePlaceOfPresence({ activityId: item.id });
+      if (response?.status === 200) {
+        showToast("success", response?.msg || "Place updated successfully");
+        await fetchUserProfile();
+      } else {
+        showToast(
+          "error",
+          response?.msg || "Failed to update place. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error handling place:", error);
+      showToast("error", "Failed to update place. Please try again.");
+    } finally {
+      setActivityLoader(false);
+    }
   };
 
   const renderButtons = (items: ItemProps[]) =>
     items.map((item) => (
       <TouchableOpacity
         key={item.id}
-        style={styles.button}
+        style={[
+          styles.button,
+          {
+            backgroundColor:
+              user?.activityId === item.id ? Colors.primary : "#FFFFFF",
+          },
+        ]}
         onPress={() => handlePress(item)}
       >
-        <Text style={styles.buttonText}>{item.name}</Text>
+        <View style={{flexDirection: "row", alignItems: "center", gap: 3}}>
+          <Text
+          style={[
+            styles.buttonText,
+            {
+              color:
+                user?.activityId === item.id ? "#ffffff" : Colors.text.primary,
+            },
+          ]}
+        >
+          {item.name}
+        </Text>
+        {activityLoader && currentId === item.id && (
+          <ActivityIndicator size="small" />
+        )}
+        </View>
       </TouchableOpacity>
     ));
 

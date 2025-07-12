@@ -47,3 +47,4 @@ export const submitCheckIn = (data: ApiData) => post('/check/in', data);
 export const submitCheckOut = (data: ApiData) => patch('/check/out', data);
 
 export const fetchPlaceOfPresence = (data?: ApiData) => get('/place-of-presence/all', data);
+export const updatePlaceOfPresence = (data?: ApiData) => patch('/place-of-presence/update', data);

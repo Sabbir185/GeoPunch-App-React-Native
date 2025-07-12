@@ -142,6 +142,8 @@ export default function Home() {
               (a: any, b: any) =>
                 (a?.name?.length || 0) - (b?.name?.length || 0)
             )}
+          fetchUserProfile={fetchUserProfile}
+          user={user}
         />
       </View>
     </ScrollView>
