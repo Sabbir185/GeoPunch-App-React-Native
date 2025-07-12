@@ -18,7 +18,7 @@ import { z } from "zod";
 import { TextInput } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { resetPassword } from "@/services/api.helper";
+import { changePassword, resetPassword } from "@/services/api.helper";
 import { showToast } from "@/services/toastConfig";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -28,13 +28,13 @@ const signUpSchema = z
     password: z
       .string()
       .min(6, { message: "Password must be at least 6 characters" }),
-    confirm_password: z
+    confirmPassword: z
       .string()
       .min(6, { message: "Password must be at least 6 characters" }),
   })
-  .refine((data) => data.password === data.confirm_password, {
+  .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
-    path: ["confirm_password"],
+    path: ["confirmPassword"],
   });
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
@@ -55,34 +55,28 @@ export default function UpdatePassword() {
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       password: "",
-      confirm_password: "",
+      confirmPassword: "",
     },
   });
 
   const onSubmit = async (data: SignUpFormData) => {
     try {
       setIsIndicator(true);
-      const payload = {
-        emailOrPhone:
-          params?.toggleBtn === "email" ? params?.userEmail : params?.phone,
-        newPassword: data?.password,
-        otp: params?.otp,
-      };
-      const res = await resetPassword(payload);
+      const res = await changePassword(data);
       if (res?.statusCode === 400) {
-        showToast("error", res?.message);
+        showToast("error", res?.msg);
         return;
       } else {
         await AsyncStorage.removeItem("token");
         await AsyncStorage.removeItem("user_signup");
-        showToast("success", res?.message || "OTP sent successfully");
+        showToast("success", res?.msg || "Password updated successfully");
         router.push("/login");
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         showToast(
           "error",
-          error.response?.data?.message ||
+          error.response?.data?.msg ||
             "Password update failed. Please try again."
         );
       } else {
@@ -154,7 +148,7 @@ export default function UpdatePassword() {
               <Text style={styles.label}>Confirm New Password</Text>
               <Controller
                 control={control}
-                name="confirm_password"
+                name="confirmPassword"
                 render={({ field: { onChange, value } }) => (
                   <>
                     <TextInput
@@ -183,9 +177,9 @@ export default function UpdatePassword() {
                       outlineColor={Colors.boarder}
                       activeOutlineColor={Colors.light}
                     />
-                    {errors.confirm_password && (
+                    {errors.confirmPassword && (
                       <Text style={styles.errorText}>
-                        {errors.confirm_password.message}
+                        {errors.confirmPassword.message}
                       </Text>
                     )}
                   </>

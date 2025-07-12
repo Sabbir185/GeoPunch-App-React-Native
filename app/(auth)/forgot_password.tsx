@@ -65,10 +65,10 @@ export default function ForgotPassword() {
       };
       const res = await otpForgetPassword(payload);
       if (res?.status !== 200) {
-        showToast("error", res?.mag);
+        showToast("error", res?.msg);
         return;
       } else {
-        showToast("success", res?.mag || "OTP sent successfully");
+        showToast("success", res?.msg || "OTP sent successfully");
         router.push({
           pathname: "/otp_verify",
           params: {
@@ -125,12 +125,12 @@ export default function ForgotPassword() {
             <View style={{ marginTop: 30 }}>
               <Text style={styles.title}>Forget Your Password</Text>
               <Text style={styles.subtitle}>
-                Enter your email or phone number to get verification code
+                Enter your email to get verification code (OTP)
               </Text>
             </View>
 
             {/* toggle button */}
-            <View
+            {/* <View
               style={{
                 marginTop: 30,
                 borderWidth: 1,
@@ -165,7 +165,7 @@ export default function ForgotPassword() {
                   indicatorColor: Colors.white,
                 }}
               />
-            </View>
+            </View> */}
 
             {/* input form */}
             <View style={{ marginTop: 30 }}>

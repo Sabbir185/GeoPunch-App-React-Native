@@ -14,9 +14,11 @@ import { OtpInput } from "react-native-otp-entry";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
+  otpForgetPassword,
   postSignup,
   resetPassword,
   sendSignUpOtp,
+  verifyOTP,
 } from "@/services/api.helper";
 import axios from "axios";
 import { showToast } from "@/services/toastConfig";
@@ -28,6 +30,7 @@ export default function OTPVerify() {
   const [isTimeExpired, setIsTimeExpired] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60 * 5);
   const [isIndicator, setIsIndicator] = useState(false);
+  const [isResendingOTP, setIsResendingOTP] = useState(false);
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -74,24 +77,7 @@ export default function OTPVerify() {
             <View>
               <TouchableOpacity
                 onPress={async () => {
-                  const sign =
-                    (await AsyncStorage.getItem("user_signup")) || "";
-                  const data = JSON.parse(sign);
-                  router.push({
-                    pathname:
-                      params?.preScreen === "forgot_password"
-                        ? "/forgot_password"
-                        : "/signup",
-                    params: {
-                      preScreen: "otp_verify",
-                      toggleBtn: "edit",
-                      name: data?.name,
-                      email: data?.email || data?.userEmail,
-                      phone: data?.phone,
-                      password: data?.password,
-                      isTerms: data?.isTerms,
-                    },
-                  });
+                  router.back();
                 }}
               >
                 <Text style={styles.edit}>Edit</Text>
@@ -131,8 +117,10 @@ export default function OTPVerify() {
                     otp: text,
                     action: "reset_password",
                   };
-                  res = await postSignup(payload);
+                  res = await verifyOTP(payload);
                   if (res?.status === 200) {
+                    await AsyncStorage.setItem("token", res?.data?.accessToken);
+                    showToast("error", res?.msg);
                     router.push({
                       pathname: "/update_password",
                       params: {
@@ -188,19 +176,17 @@ export default function OTPVerify() {
                 <View>
                   <TouchableOpacity
                     onPress={async () => {
+                      setIsResendingOTP(true);
                       try {
-                        const sign =
-                          (await AsyncStorage.getItem("user_signup")) || "";
-                        const data = JSON.parse(sign);
-                        const res = await sendSignUpOtp({
-                          emailOrPhone:
-                            params?.userEmail || params?.phone || data?.email,
+                        const res = await otpForgetPassword({
+                          email: params?.userEmail,
+                          action: "reset_password"
                         });
                         showToast(
                           "success",
                           res?.message || "OTP sent successfully!"
                         );
-                        setTimeLeft(60 * 3);
+                        setTimeLeft(60 * 5);
                         setIsTimeExpired(false);
                       } catch (error) {
                         if (axios.isAxiosError(error)) {
@@ -216,6 +202,8 @@ export default function OTPVerify() {
                             "An unexpected error occurred. Please try again."
                           );
                         }
+                      } finally{
+                        setIsResendingOTP(false);
                       }
                     }}
                   >
@@ -234,6 +222,7 @@ export default function OTPVerify() {
           </View>
         </View>
         {isIndicator && <LoadingOverlay message="Verifying OTP..." />}
+        {isResendingOTP && <LoadingOverlay message="Resending OTP..." />}
       </View>
     </SafeAreaView>
   );

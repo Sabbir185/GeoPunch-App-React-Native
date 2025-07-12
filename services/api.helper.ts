@@ -29,7 +29,8 @@ export const verifyAccount = (data: ApiData) => post('/auth/verify-identifier', 
 export const sendSignUpOtp = (data: ApiData) => post('/auth/signup/otp', data);
 export const otpForgetPassword = (data: ApiData) => post('/auth/otp', data);
 export const resetPassword = (data: ApiData) => post('/auth/reset-password', data);
-export const changePassword = (data: ApiData) => post('/auth/change-password', data);
+export const verifyOTP = (data: ApiData) => post('/auth/otp/verify', data);
+export const changePassword = (data: ApiData) => post('/auth/update-password', data);
 
 export const fetchAboutUs = (data?: ApiData) => get('/settings/about-us', data);
 export const fetchPrivacyPolicy = (data?: ApiData) => get('/settings/privacy-policy', data);

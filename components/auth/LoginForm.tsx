@@ -150,9 +150,14 @@ const LoginForm: React.FC = () => {
         )}
       />
 
-      <TouchableOpacity onPress={() => router.push("/forgot_password")}>
-        <Text style={styles.forgotPassword}>Forgot Password?</Text>
-      </TouchableOpacity>
+      <View style={{ alignItems: "flex-end" }}>
+        <TouchableOpacity 
+          onPress={() => router.push("/forgot_password")}
+          style={{ alignSelf: "flex-end" }}
+        >
+          <Text style={styles.forgotPassword}>Forgot Password?</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Login Button */}
       <Button
