@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React from "react";
 import { Fonts } from "@/constants/Fonts";
 import { Colors } from "@/constants/Colors";
+import LoadingOverlay from "../common/LoadingOverlay";
 
 interface ItemProps {
   name: string;
@@ -19,7 +20,7 @@ export default function Overview({ mostUsedItems, additionalItems }: IProps) {
     // Handle button press here
   };
 
-  const renderButtons = (items: ItemProps[]) => 
+  const renderButtons = (items: ItemProps[]) =>
     items.map((item) => (
       <TouchableOpacity
         key={item.id}
@@ -30,10 +31,14 @@ export default function Overview({ mostUsedItems, additionalItems }: IProps) {
       </TouchableOpacity>
     ));
 
+  if (mostUsedItems?.length === 0 || additionalItems?.length === 0) {
+    return <LoadingOverlay message="Checking in..." />;
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Place Of Presence</Text>
-      
+
       {/* Most Used Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Most Used</Text>

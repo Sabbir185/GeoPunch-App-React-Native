@@ -10,31 +10,26 @@ import React, { useContext, useEffect, useState } from "react";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { images } from "@/constants/images";
-import CheckedInOutButton from "@/components/common/checkedInOut";
 import UserProfile from "@/components/home/Profile";
 import dayjs from "dayjs";
 import Overview from "@/components/home/Overview";
 import { UserContext } from "@/contexts/user";
 import { useLocation } from "@/contexts/LocationContext";
-import {
-  fetchAttendanceStatus,
-  requestAutoAttendance,
-  requestManualAttendance,
-} from "@/services/api.helper";
-import { showToast } from "@/services/toastConfig";
-import axios from "axios";
+import { fetchPlaceOfPresence } from "@/services/api.helper";
 import CheckInOutButton from "@/components/home/CheckInOutButton";
 import LoadingOverlay from "@/components/common/LoadingOverlay";
 
 export default function Home() {
-  const [attendenceStatus, setAttendenceStatus] = useState<any>();
-  const [checkedStatus, setCheckedStatus] = useState("in");
   const { user, fetchUserProfile } = useContext(UserContext);
   const [refreshing, setRefreshing] = React.useState(false);
   const [currentTime, setCurrentTime] = useState(dayjs());
   const { lat, lng, address, setLocation } = useLocation();
   const [checkInIndicator, setCheckInIndicator] = useState(false);
   const [checkOutIndicator, setCheckOutIndicator] = useState(false);
+  const [placeOfPresence, setPlaceOfPresence] = useState({
+    common: [],
+    additional: [],
+  });
 
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
@@ -53,43 +48,10 @@ export default function Home() {
 
   useEffect(() => {
     (async () => {
-      if (lat && lng && address) {
-        try {
-          const res = await requestAutoAttendance({
-            location: {
-              lat: lat,
-              lng: lng,
-              address: address,
-            },
-          });
-          if (res?.statusCode === 400) {
-            showToast("error", res?.message);
-          }
-          if (res?.status) {
-            setCheckedStatus(res?.status);
-            setRefreshing(!refreshing);
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      }
-    })();
-  }, [lat, lng, address]);
-
-  useEffect(() => {
-    (async () => {
       try {
-        const attendence = await fetchAttendanceStatus();
-        setAttendenceStatus({
-          ...attendence,
-          my_location: { lat, lng, address },
-        });
-        if (attendence?.checkStatus === "in") {
-          setCheckedStatus("in");
-          setRefreshing(false);
-        } else if (attendence?.checkStatus === "out") {
-          setCheckedStatus("out");
-          setRefreshing(false);
+        const res = await fetchPlaceOfPresence();
+        if (res?.status === 200) {
+          setPlaceOfPresence(res?.data);
         }
       } catch (error) {
         console.log(error);
@@ -168,16 +130,18 @@ export default function Home() {
 
         {/* Overview */}
         <Overview
-          mostUsedItems={[
-            { name: "Check In", id: "1" },
-            { name: "Check Out", id: "2" },
-            { name: "Break", id: "3" },
-          ]}
-          additionalItems={[
-            { name: "Report", id: "4" },
-            { name: "Settings", id: "5" },
-            { name: "Help", id: "6" },
-          ]}
+          mostUsedItems={(placeOfPresence?.common || [])
+            .slice()
+            .sort(
+              (a: any, b: any) =>
+                (a?.name?.length || 0) - (b?.name?.length || 0)
+            )}
+          additionalItems={(placeOfPresence?.additional || [])
+            .slice()
+            .sort(
+              (a: any, b: any) =>
+                (a?.name?.length || 0) - (b?.name?.length || 0)
+            )}
         />
       </View>
     </ScrollView>

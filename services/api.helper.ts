@@ -45,3 +45,5 @@ export const fetchAttendanceSummary = (data?: ApiData) => get('/attendance/summa
 // check in and out
 export const submitCheckIn = (data: ApiData) => post('/check/in', data);
 export const submitCheckOut = (data: ApiData) => patch('/check/out', data);
+
+export const fetchPlaceOfPresence = (data?: ApiData) => get('/place-of-presence/all', data);
