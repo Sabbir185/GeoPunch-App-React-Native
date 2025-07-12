@@ -20,6 +20,8 @@ interface User {
   dateOfBirth: string | Date;
   designation: string;
   department: string;
+  activityStatus: string;
+  activityLog: any; // Adjust type as needed
 }
 
 interface UserContextType {

@@ -41,3 +41,7 @@ export const requestManualAttendance = (data: ApiData) => post('/attendance/manu
 export const fetchAttendanceStatus = (data?: ApiData) => get('/attendance/status', data);
 export const fetchAttendanceLogs = (data?: ApiData) => get('/attendance/logs', data);
 export const fetchAttendanceSummary = (data?: ApiData) => get('/attendance/summary', data);
+
+// check in and out
+export const submitCheckIn = (data: ApiData) => post('/check/in', data);
+export const submitCheckOut = (data: ApiData) => patch('/check/out', data);

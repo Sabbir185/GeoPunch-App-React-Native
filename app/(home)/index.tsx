@@ -24,6 +24,7 @@ import {
 import { showToast } from "@/services/toastConfig";
 import axios from "axios";
 import CheckInOutButton from "@/components/home/CheckInOutButton";
+import LoadingOverlay from "@/components/common/LoadingOverlay";
 
 export default function Home() {
   const [attendenceStatus, setAttendenceStatus] = useState<any>();
@@ -32,7 +33,8 @@ export default function Home() {
   const [refreshing, setRefreshing] = React.useState(false);
   const [currentTime, setCurrentTime] = useState(dayjs());
   const { lat, lng, address, setLocation } = useLocation();
-  const [checkIndicator, setCheckIndicator] = useState(false);
+  const [checkInIndicator, setCheckInIndicator] = useState(false);
+  const [checkOutIndicator, setCheckOutIndicator] = useState(false);
 
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
@@ -151,11 +153,17 @@ export default function Home() {
 
           {/* check in, out button */}
           <CheckInOutButton
-            isCheckedIn={false}
-            onCheckIn={() => console.log("Check In pressed")}
-            onCheckOut={() => console.log("Check out pressed")}
-            isLoading={false}
+            isCheckedIn={user?.activityLog?.action === "Checked-In"}
+            fetchUserProfile={fetchUserProfile}
+            isLoading={!user}
+            user={user}
+            location={{ lat, lng, address }}
+            setCheckInIndicator={setCheckInIndicator}
+            setCheckOutIndicator={setCheckOutIndicator}
           />
+
+          {checkInIndicator && <LoadingOverlay message="Checking in..." />}
+          {checkOutIndicator && <LoadingOverlay message="Checking out..." />}
         </View>
 
         {/* Overview */}
