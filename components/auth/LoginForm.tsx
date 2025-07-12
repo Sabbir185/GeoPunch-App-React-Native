@@ -44,7 +44,7 @@ const LoginForm: React.FC = () => {
     defaultValues: { email: "", password: "" },
   });
 
-  const onSubmit = async (data: ILoginFormData) => {   
+  const onSubmit = async (data: ILoginFormData) => {
     try {
       setIsIndicator(true);
       const payload = {
@@ -54,11 +54,8 @@ const LoginForm: React.FC = () => {
         device: "mobile",
       };
 
-      const res = await axios.post(
-        config?.API_URL + "/auth/login",
-        payload
-      );
-      
+      const res = await axios.post(config?.API_URL + "/auth/login", payload);
+
       if (res?.data?.data?.accessToken) {
         try {
           await AsyncStorage.setItem("token", res?.data?.data?.accessToken);
@@ -66,7 +63,10 @@ const LoginForm: React.FC = () => {
           await fetchUserProfile();
           router.push("/(home)");
         } catch (e) {
-          showToast("error", "Login failed. Please try again.");
+          showToast(
+            "error",
+            res?.data?.msg || "Login failed. Please try again."
+          );
         }
       }
     } catch (error) {
@@ -74,7 +74,7 @@ const LoginForm: React.FC = () => {
         console.log(error.response?.data);
         showToast(
           "error",
-          error.response?.data?.message || "Login failed. Please try again."
+          error.response?.data?.msg || "Login failed. Please try again."
         );
       } else {
         showToast("error", "An unexpected error occurred. Please try again.");
@@ -83,6 +83,7 @@ const LoginForm: React.FC = () => {
       setIsIndicator(false);
     }
   };
+
   return (
     <View style={styles.container}>
       {/* Email Input */}
@@ -151,7 +152,7 @@ const LoginForm: React.FC = () => {
       />
 
       <View style={{ alignItems: "flex-end" }}>
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => router.push("/forgot_password")}
           style={{ alignSelf: "flex-end" }}
         >
