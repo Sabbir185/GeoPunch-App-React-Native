@@ -1,8 +1,9 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { Colors } from "@/constants/Colors";
 import { images } from "@/constants/images";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface IProps {
   icon?: any;
@@ -21,7 +22,19 @@ export default function OptionCard({ icon, title, screenUrl }: IProps) {
           styles.pressableContainer,
           pressed && styles.pressedState,
         ]}
-        onPress={() => {
+        onPress={async () => {
+          if (
+            title === "Change Password" &&
+            screenUrl === "/settings/change_password"
+          ) {
+            router.push("/forgot_password");
+            try {
+              await AsyncStorage.removeItem("token");
+            } catch (e) {
+              console.log(e);
+            }
+            return;
+          }
           if (screenUrl) {
             router.push(screenUrl);
           }

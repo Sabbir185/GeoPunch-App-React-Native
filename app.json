@@ -23,7 +23,7 @@
       "bundleIdentifier": "bd.com.appstick.gpstracking"
     },
     "splash": {
-      "image": "./assets/splash2.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -51,7 +51,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/splash2.png",
+          "image": "./assets/splash.png",
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }

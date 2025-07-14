@@ -8,7 +8,7 @@ export const postSignup = (data: ApiData) => post('/auth/signup', data);
 export const fetchProfile = (data: ApiData) => get('/profile', data);
 export const updateProfile = (data: ApiData) => patch('/profile', data);
 export const updatePassword = (data: ApiData) => patch('/user/password-change', data);
-export const accountDeleteByToken = (data: ApiData) => post('/auth/delete-account', data);
+export const accountDeleteByToken = (data: ApiData) => patch('/profile', data);
 
 // File Upload APIs
 export const uploadProfileImage = (data: ApiData) => postForm('/profile/image', data);

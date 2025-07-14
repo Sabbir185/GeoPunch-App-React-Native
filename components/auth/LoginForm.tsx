@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { TextInput, Text } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useForm, Controller } from "react-hook-form";
@@ -55,6 +55,14 @@ const LoginForm: React.FC = () => {
       };
 
       const res = await axios.post(config?.API_URL + "/auth/login", payload);
+
+      if (res?.data?.isDeleted) {
+        Alert.alert(
+          "Account Deleted",
+          "Your account has been deleted. Please contact support for assistance."
+        );
+        return;
+      }
 
       if (res?.data?.data?.accessToken) {
         try {

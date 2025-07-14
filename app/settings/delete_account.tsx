@@ -167,9 +167,9 @@ export default function DeleteAccount() {
               onPress={async () => {
                 try {
                   setIsIndicator(true);
-                  const res = await accountDeleteByToken({});
-                  if (res?.statusCode === 401) {
-                    showToast("error", res?.message);
+                  const res = await accountDeleteByToken({isDeleted: true});
+                  if (res?.status === 401) {
+                    showToast("error", res?.msg);
                   } else {
                     await AsyncStorage.removeItem("token");
                     await AsyncStorage.removeItem("user");
@@ -180,7 +180,7 @@ export default function DeleteAccount() {
                   if (axios.isAxiosError(error)) {
                     showToast(
                       "error",
-                      error.response?.data?.message ||
+                      error?.message ||
                         "Failed to delete, Please try again."
                     );
                   } else {
