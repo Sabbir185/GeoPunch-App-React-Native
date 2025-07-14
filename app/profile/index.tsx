@@ -15,12 +15,10 @@ import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { useRouter } from "expo-router";
 import ImagePickerInput from "@/components/common/ImagePicker";
-import DateTimePickerInput from "@/components/common/DateTimePicker";
-import SelectInput from "@/components/common/Select";
 import { UserContext } from "@/contexts/user";
 import dayjs from "dayjs";
 import EditFieldBottomSheet from "@/components/profile/EditFieldBottomSheet";
-import { updateProfile, uploadProfileImage } from "@/services/api.helper";
+import { updateProfile } from "@/services/api.helper";
 import { showToast } from "@/services/toastConfig";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -46,6 +44,8 @@ const signUpSchema = z
     confirm_password: z
       .string()
       .min(6, { message: "Password must be at least 6 characters" }),
+    department: z.string().optional(),
+    designation: z.string().optional(),
   })
   .refine((data) => data.password === data.confirm_password, {
     message: "Passwords do not match",
@@ -61,7 +61,7 @@ export default function ProfileUpdate() {
   const [dateTime, setDateTime] = useState<any>();
   const [image, setImage] = useState<any>();
   const [selectedField, setSelectedField] = useState<
-    "name" | "email" | "phone" | null
+    "name" | "email" | "phone" | "department" | "designation" | null
   >(null);
   const [fieldValue, setFieldValue] = useState<any>("");
   const [isUpdated, setIsUpdated] = useState(false);
@@ -79,6 +79,8 @@ export default function ProfileUpdate() {
       password: "",
       confirm_password: "",
       phone: "",
+      department: "",
+      designation: "",
     },
   });
 
@@ -88,6 +90,8 @@ export default function ProfileUpdate() {
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
+        department: user.department || "",
+        designation: user.designation || "",
       });
       setGender(user?.gender || "");
       setDateTime(user?.dateOfBirth ? dayjs(user?.dateOfBirth) : "");
@@ -99,12 +103,12 @@ export default function ProfileUpdate() {
     try {
       setIsIndicator(true);
       const res = await updateProfile(payload);
-      if (res?.statusCode === 400) {
-        showToast("error", res?.message);
-      } else if (res?.statusCode === 401) {
-        showToast("error", res?.message);
+      if (res?.status === 400) {
+        showToast("error", res?.msg);
+      } else if (res?.status === 401) {
+        showToast("error", res?.msg);
       } else {
-        showToast("success", res?.message || "Data updated successfully");
+        showToast("success", res?.msg || "Data updated successfully");
         await fetchUserProfile();
         setIsUpdated(!isUpdated);
       }
@@ -152,53 +156,59 @@ export default function ProfileUpdate() {
             <ImagePickerInput
               imageValue={image}
               setImageValue={async (data) => {
+                const asset = data?.assets?.[0];
+                const isImage = asset?.mimeType?.startsWith("image/");
+                const isSizeOk = asset?.fileSize
+                  ? asset.fileSize < 10 * 1024 * 1024
+                  : true;
+                if (!isImage || !isSizeOk) {
+                  showToast(
+                    "error",
+                    !isImage
+                      ? "Invalid file type. Please upload a valid image."
+                      : "File size too large. Please upload an image less than 10MB."
+                  );
+                  return;
+                }
                 const formData: any = new FormData();
-                formData.append("image", {
-                  uri: data?.assets[0]?.uri,
-                  type: data?.assets[0]?.mimeType,
-                  name: data?.assets[0]?.fileName,
+                formData.append("file", {
+                  uri: asset.uri,
+                  name: asset.fileName,
+                  type: asset.mimeType,
                 });
                 try {
                   const token = await AsyncStorage.getItem("token");
-                  const response: any = await axios.post(
-                    config.API_URL + "/profile/image",
-                    formData,
+                  const response: any = await fetch(
+                    config?.API_URL + "/file/upload",
                     {
+                      method: "POST",
                       headers: {
                         "Content-Type": "multipart/form-data",
                         Authorization: `Bearer ${token}`,
                       },
+                      body: formData,
                     }
                   );
-                  if (response?.data?.imageUrl) {
+                  const result = await response.json();
+                  if (result?.url) {
                     handleUpdate({
                       image:
-                        typeof response?.data?.imageUrl === "string"
-                          ? response?.data?.imageUrl
+                        typeof result?.url === "string"
+                          ? result?.url
                           : data?.assets[0]?.uri || "",
                     });
                     showToast(
                       "success",
-                      response?.data?.message || "Data updated successfully"
+                      result?.message || "Data updated successfully"
                     );
-                    await fetchUserProfile();
+                    // await fetchUserProfile();
                     setIsUpdated(!isUpdated);
                   } else {
-                    showToast("error", response?.message);
+                    showToast("error", result?.message);
                   }
                 } catch (error) {
-                  if (axios.isAxiosError(error)) {
-                    showToast(
-                      "error",
-                      error.response?.data?.message ||
-                        "Failed to upload, Please try again."
-                    );
-                  } else {
-                    showToast(
-                      "error",
-                      "An unexpected error occurred. Please try again."
-                    );
-                  }
+                  console.log(error);
+                  showToast("error", "Failed to upload, Please try again.");
                 }
               }}
             />
@@ -335,7 +345,97 @@ export default function ProfileUpdate() {
               )}
             />
 
-            <View style={{ marginBottom: 6 }}>
+            {/* Department Input */}
+            <Text style={styles.label}>Department</Text>
+            <Controller
+              control={control}
+              name="department"
+              render={({ field: { onChange, value } }) => (
+                <>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedField("department");
+                      setFieldValue(value);
+                    }}
+                  >
+                    <TextInput
+                      placeholder="example@email.com"
+                      value={value}
+                      onChangeText={onChange}
+                      mode="outlined"
+                      left={
+                        <TextInput.Icon
+                          icon={() => (
+                            <Icon
+                              name="atlassian"
+                              size={20}
+                              color={Colors.text.tertiary}
+                            />
+                          )}
+                        />
+                      }
+                      autoCapitalize="none"
+                      style={styles.input}
+                      outlineColor={Colors.boarder}
+                      activeOutlineColor={Colors.light}
+                      editable={false}
+                    />
+                  </TouchableOpacity>
+                  {errors.department && (
+                    <Text style={styles.errorText}>
+                      {errors.department.message}
+                    </Text>
+                  )}
+                </>
+              )}
+            />
+
+            {/* Department Input */}
+            <Text style={styles.label}>Designation</Text>
+            <Controller
+              control={control}
+              name="designation"
+              render={({ field: { onChange, value } }) => (
+                <>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedField("designation");
+                      setFieldValue(value);
+                    }}
+                  >
+                    <TextInput
+                      placeholder="example@email.com"
+                      value={value}
+                      onChangeText={onChange}
+                      mode="outlined"
+                      left={
+                        <TextInput.Icon
+                          icon={() => (
+                            <Icon
+                              name="atom"
+                              size={20}
+                              color={Colors.text.tertiary}
+                            />
+                          )}
+                        />
+                      }
+                      autoCapitalize="none"
+                      style={styles.input}
+                      outlineColor={Colors.boarder}
+                      activeOutlineColor={Colors.light}
+                      editable={false}
+                    />
+                  </TouchableOpacity>
+                  {errors.designation && (
+                    <Text style={styles.errorText}>
+                      {errors.designation.message}
+                    </Text>
+                  )}
+                </>
+              )}
+            />
+
+            {/* <View style={{ marginBottom: 6 }}>
               <Text style={styles.label}>Date of Birth</Text>
               <DateTimePickerInput
                 dateTime={dateTime}
@@ -354,7 +454,7 @@ export default function ProfileUpdate() {
                 }}
                 data={genderData}
               />
-            </View>
+            </View> */}
           </View>
           {isIndicator && (
             <ActivityIndicator

@@ -112,14 +112,14 @@ const EditFieldBottomSheet: React.FC<EditFieldBottomSheetProps> = ({
             >
               Cancel
             </Button>
-            <Button
+            {/* <Button
               mode="contained"
               onPress={handleSave}
               style={[styles.button, styles.saveButton]}
               labelStyle={styles.saveButtonText}
             >
               Save
-            </Button>
+            </Button> */}
           </View>
         </View>
         {isIndicator && (

@@ -6,7 +6,7 @@ type ApiData = Record<string, any>;
 export const postLogin = (data: ApiData) => post('/auth/login', data);
 export const postSignup = (data: ApiData) => post('/auth/signup', data);
 export const fetchProfile = (data: ApiData) => get('/profile', data);
-export const updateProfile = (data: ApiData) => put('/profile', data);
+export const updateProfile = (data: ApiData) => patch('/profile', data);
 export const updatePassword = (data: ApiData) => patch('/user/password-change', data);
 export const accountDeleteByToken = (data: ApiData) => post('/auth/delete-account', data);
 
