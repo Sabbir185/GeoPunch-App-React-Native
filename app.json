@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "geopunch",
-    "slug": "geopunch",
+    "name": "GeoPunch",
+    "slug": "GeoPunch",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/adaptive-icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

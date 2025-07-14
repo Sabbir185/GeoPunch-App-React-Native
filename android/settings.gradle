@@ -21,7 +21,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   }
 }
 
-rootProject.name = 'gps-tracking'
+rootProject.name = 'GeoPunch'
 
 dependencyResolutionManagement {
   versionCatalogs {
