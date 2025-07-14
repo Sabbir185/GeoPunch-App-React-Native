@@ -12,6 +12,7 @@ import { Fonts } from "@/constants/Fonts";
 import ActivityCard from "@/components/activity/ActivityCard";
 import dayjs from "dayjs";
 import { fetchAttendanceLogs } from "@/services/api.helper";
+import LoadingOverlay from "@/components/common/LoadingOverlay";
 
 export default function Activity() {
   const [activities, setActivities] = useState([]);
@@ -57,6 +58,14 @@ export default function Activity() {
     fetchActivities();
   }, [filter, refreshing]);
 
+  const [loader, setLoader] = useState(true);
+  useEffect(() => {
+    const loaderTimer = setTimeout(() => {
+      setLoader(false);
+    }, 5000);
+    return () => clearTimeout(loaderTimer);
+  }, []);
+
   const handleRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
@@ -72,6 +81,10 @@ export default function Activity() {
   const getCurrentMonthName = () => {
     const month = months.find((m) => m.number === filter.month);
     return month ? month.name : "";
+  };
+
+  const showLoader = () => {
+    return <LoadingOverlay message="Data is loading..." />;
   };
 
   return (
@@ -154,38 +167,46 @@ export default function Activity() {
 
       {/* Activity list */}
       <View style={styles.activityContainer}>
-        {activities.length === 0 ? (
+        {activities.length === 0 && !loader ? (
           <Text style={{ textAlign: "center", color: "#888" }}>
             No activity found for {getCurrentMonthName()} {filter.year}
           </Text>
         ) : (
-          <FlatList
-            data={activities}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }: { item: any }) => (
-              <ActivityCard
-                date={dayjs(item.date).format("MMMM D, YYYY")}
-                location={item?.checkedInPlace?.address}
-                checkIn={
-                  item?.checkedInTime ? dayjs(item.checkedInTime).format("hh:mm A") : "N/A"
-                }
-                checkOut={
-                  item?.checkedOutTime
-                    ? dayjs(item.checkedOutTime).format("hh:mm A")
-                    : "N/A"
+          <>
+            {activities?.length === 0 && loader ? (
+              showLoader()
+            ) : (
+              <FlatList
+                data={activities}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }: { item: any }) => (
+                  <ActivityCard
+                    date={dayjs(item.date).format("MMMM D, YYYY")}
+                    location={item?.checkedInPlace?.address}
+                    checkIn={
+                      item?.checkedInTime
+                        ? dayjs(item.checkedInTime).format("hh:mm A")
+                        : "N/A"
+                    }
+                    checkOut={
+                      item?.checkedOutTime
+                        ? dayjs(item.checkedOutTime).format("hh:mm A")
+                        : "N/A"
+                    }
+                  />
+                )}
+                showsVerticalScrollIndicator={false}
+                ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
+                contentContainerStyle={{ paddingTop: 10, paddingBottom: 135 }}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={handleRefresh}
+                  />
                 }
               />
             )}
-            showsVerticalScrollIndicator={false}
-            ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
-            contentContainerStyle={{ paddingTop: 10, paddingBottom: 135 }}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
-              />
-            }
-          />
+          </>
         )}
       </View>
     </View>
