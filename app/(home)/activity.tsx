@@ -18,6 +18,8 @@ export default function Activity() {
   const [activities, setActivities] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
+  const [loader, setLoader] = useState(true);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [filter, setFilter] = useState({
     year: dayjs().year(),
     month: dayjs().month() + 1,
@@ -41,6 +43,8 @@ export default function Activity() {
   const years = Array.from({ length: 6 }, (_, i) => dayjs().year() - i);
 
   const fetchActivities = async () => {
+    setLoader(true);
+    setIsFiltering(true);
     try {
       const res = await fetchAttendanceLogs({
         year: filter.year,
@@ -51,6 +55,9 @@ export default function Activity() {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoader(false);
+      setIsFiltering(false);
     }
   };
 
@@ -58,13 +65,12 @@ export default function Activity() {
     fetchActivities();
   }, [filter, refreshing]);
 
-  const [loader, setLoader] = useState(true);
-  useEffect(() => {
-    const loaderTimer = setTimeout(() => {
-      setLoader(false);
-    }, 5000);
-    return () => clearTimeout(loaderTimer);
-  }, []);
+  // useEffect(() => {
+  //   const loaderTimer = setTimeout(() => {
+  //     setLoader(false);
+  //   }, 5000);
+  //   return () => clearTimeout(loaderTimer);
+  // }, []);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -173,7 +179,7 @@ export default function Activity() {
           </Text>
         ) : (
           <>
-            {activities?.length === 0 && loader ? (
+            {(activities?.length === 0 && loader) || isFiltering ? (
               showLoader()
             ) : (
               <FlatList
