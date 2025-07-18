@@ -49,6 +49,7 @@ export default function Overview({
   const [newPlaceName, setNewPlaceName] = React.useState("");
   const [selectedType, setSelectedType] = React.useState("Most Used");
   const [dropdownVisible, setDropdownVisible] = React.useState(false);
+  const [addPlaceLoading, setAddPlaceLoading] = React.useState(false);
 
   const handlePress = async (item: ItemProps) => {
     // console.log("Pressed:", item.name, "ID:", item.id);
@@ -78,6 +79,9 @@ export default function Overview({
       Alert.alert("Error", "Please enter a place name");
       return;
     }
+    
+    setAddPlaceLoading(true);
+    
     try {
       const result = await addPlaceOfPresence({
         name: newPlaceName,
@@ -87,6 +91,12 @@ export default function Overview({
         showToast("success", result?.msg || "Place added successfully");
         setRefreshing(true);
         await fetchUserProfile();
+        
+        // Reset form and close modal
+        setNewPlaceName("");
+        setSelectedType("Most Used");
+        setDropdownVisible(false);
+        setModalVisible(false);
       } else {
         showToast(
           "error",
@@ -96,14 +106,9 @@ export default function Overview({
     } catch (error) {
       console.error("Error adding place:", error);
       showToast("error", "Failed to add place. Please try again.");
-      return;
+    } finally {
+      setAddPlaceLoading(false);
     }
-
-    // Reset form and close modal
-    setNewPlaceName("");
-    setSelectedType("Most Used");
-    setDropdownVisible(false);
-    setModalVisible(false);
   };
 
   const renderButtons = (items: ItemProps[]) =>
@@ -263,8 +268,13 @@ export default function Overview({
               <TouchableOpacity
                 style={[styles.modalButton, styles.addModalButton]}
                 onPress={handleAddPlace}
+                disabled={addPlaceLoading}
               >
-                <Text style={styles.addModalButtonText}>Add Place</Text>
+                {addPlaceLoading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.addModalButtonText}>Add Place</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
