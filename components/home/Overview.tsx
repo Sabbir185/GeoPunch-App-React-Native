@@ -13,8 +13,12 @@ import React from "react";
 import { Fonts } from "@/constants/Fonts";
 import { Colors } from "@/constants/Colors";
 import LoadingOverlay from "../common/LoadingOverlay";
-import { updatePlaceOfPresence } from "@/services/api.helper";
+import {
+  addPlaceOfPresence,
+  updatePlaceOfPresence,
+} from "@/services/api.helper";
 import { showToast } from "@/services/toastConfig";
+import config from "@/config";
 
 interface ItemProps {
   name: string;
@@ -26,6 +30,7 @@ interface IProps {
   additionalItems: ItemProps[];
   fetchUserProfile: () => void;
   user?: any;
+  setRefreshing: (value: boolean) => void | boolean;
 }
 
 export default function Overview({
@@ -33,6 +38,7 @@ export default function Overview({
   additionalItems,
   fetchUserProfile,
   user,
+  setRefreshing,
 }: IProps) {
   const [activityLoader, setActivityLoader] = React.useState(false);
   const [currentId, setCurrentId] = React.useState<
@@ -67,26 +73,37 @@ export default function Overview({
     }
   };
 
-  const handleAddPlace = () => {
+  const handleAddPlace = async () => {
     if (!newPlaceName.trim()) {
       Alert.alert("Error", "Please enter a place name");
       return;
     }
-
-    // Here you would typically call an API to add the new place
-    console.log("Adding new place:", {
-      name: newPlaceName,
-      type: selectedType,
-    });
+    try {
+      const result = await addPlaceOfPresence({
+        name: newPlaceName,
+        type: selectedType === "Most Used" ? "common" : "additional",
+      });
+      if (result?.status === 200) {
+        showToast("success", result?.msg || "Place added successfully");
+        setRefreshing(true);
+        await fetchUserProfile();
+      } else {
+        showToast(
+          "error",
+          result?.msg || "Failed to add place. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error adding place:", error);
+      showToast("error", "Failed to add place. Please try again.");
+      return;
+    }
 
     // Reset form and close modal
     setNewPlaceName("");
     setSelectedType("Most Used");
     setDropdownVisible(false);
     setModalVisible(false);
-
-    // Show success message
-    showToast("success", "Place added successfully");
   };
 
   const renderButtons = (items: ItemProps[]) =>

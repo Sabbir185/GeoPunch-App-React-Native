@@ -47,5 +47,6 @@ export const submitCheckOut = (data: ApiData) => patch('/check/out', data);
 
 export const fetchPlaceOfPresence = (data?: ApiData) => get('/place-of-presence/all', data);
 export const updatePlaceOfPresence = (data?: ApiData) => patch('/place-of-presence/update', data);
+export const addPlaceOfPresence = (data?: ApiData) => post('/place-of-presence', data);
 
 export const fetchAttendanceLogs = (data?: ApiData) => get('/activity', data);

@@ -55,6 +55,8 @@ export default function Home() {
         }
       } catch (error) {
         console.log(error);
+      } finally {
+        setRefreshing(false);
       }
     })();
   }, [refreshing]);
@@ -144,6 +146,7 @@ export default function Home() {
             )}
           fetchUserProfile={fetchUserProfile}
           user={user}
+          setRefreshing={setRefreshing}
         />
       </View>
     </ScrollView>
