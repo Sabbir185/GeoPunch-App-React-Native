@@ -8,6 +8,7 @@ import {
   Modal,
   TextInput,
   Alert,
+  AppState,
 } from "react-native";
 import React from "react";
 import { Fonts } from "@/constants/Fonts";
@@ -19,6 +20,13 @@ import {
 } from "@/services/api.helper";
 import { showToast } from "@/services/toastConfig";
 import config from "@/config";
+import { useLocation } from "@/contexts/LocationContext";
+import {
+  startLocationTracking,
+  stopLocationTracking,
+  isLocationTrackingActive,
+  sendImmediateLocationUpdate,
+} from "@/services/locationService";
 
 interface ItemProps {
   name: string;
@@ -44,12 +52,122 @@ export default function Overview({
   const [currentId, setCurrentId] = React.useState<
     undefined | number | string
   >();
-  const [isAutoMode, setIsAutoMode] = React.useState(false); // Default to manual mode (false = manual)
+  const [isAutoMode, setIsAutoMode] = React.useState(user?.isAuto ?? false);
   const [modalVisible, setModalVisible] = React.useState(false);
   const [newPlaceName, setNewPlaceName] = React.useState("");
   const [selectedType, setSelectedType] = React.useState("Most Used");
   const [dropdownVisible, setDropdownVisible] = React.useState(false);
   const [addPlaceLoading, setAddPlaceLoading] = React.useState(false);
+  const [locationTrackingActive, setLocationTrackingActive] = React.useState(false);
+  const [isInitialMount, setIsInitialMount] = React.useState(true);
+  
+  const { lat, lng, address } = useLocation();
+
+  // Check location tracking status on component mount and sync state
+  React.useEffect(() => {
+    const checkTrackingStatus = async () => {
+      const isActive = await isLocationTrackingActive();
+      setLocationTrackingActive(isActive);
+      
+      // Set initial state from user context and mark as no longer initial mount
+      setIsAutoMode(user?.isAuto ?? false);
+      setIsInitialMount(false);
+      
+      // Only sync after initial mount if there's a mismatch
+      if (!isInitialMount) {
+        if (isActive && !isAutoMode) {
+          setIsAutoMode(true);
+          console.log('App restarted with active location tracking, syncing auto mode switch');
+        } else if (!isActive && isAutoMode) {
+          setIsAutoMode(false);
+          showToast("success", "Auto location tracking stopped");
+          console.log('Location tracking inactive, syncing auto mode switch to manual');
+        }
+      }
+    };
+    checkTrackingStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.isAuto]);
+
+  // Handle auto mode toggle
+  React.useEffect(() => {
+    // Skip auto mode toggle on initial mount to prevent unwanted toasts
+    if (isInitialMount) return;
+    
+    const handleAutoModeToggle = async () => {
+      // Ensure we have valid location data
+      if (lat === null || lng === null || address === null) {
+        console.warn('Location data not available for tracking');
+        if (isAutoMode) {
+          showToast("error", "Location not available. Please enable location services.");
+          setIsAutoMode(false);
+        }
+        return;
+      }
+
+      if (isAutoMode) {
+        // Start location tracking
+        const success = await startLocationTracking({
+          isAuto: true,
+          lat,
+          lng,
+          address,
+        });
+        if (success) {
+          setLocationTrackingActive(true);
+          showToast("success", "Auto location tracking started");
+          // Send immediate location update
+          await sendImmediateLocationUpdate({
+            isAuto: true,
+            lat,
+            lng,
+            address,
+          });
+        } else {
+          showToast("error", "Failed to start location tracking. Please check permissions.");
+          setIsAutoMode(false); // Revert switch if failed
+        }
+      } else {
+        // Stop location tracking
+        const success = await stopLocationTracking({
+          isAuto: false,
+          lat,
+          lng,
+          address,
+        });
+        if (success) {
+          setLocationTrackingActive(false);
+          showToast("success", "Auto location tracking stopped");
+        } else {
+          showToast("error", "Failed to stop location tracking");
+        }
+      }
+    };
+    handleAutoModeToggle();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAutoMode]);
+
+  // Handle app state changes to manage location tracking
+  React.useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (isAutoMode && locationTrackingActive && lat !== null && lng !== null && address !== null) {
+        if (nextAppState === 'background' || nextAppState === 'inactive') {
+          console.log('App going to background, location tracking continues...');
+        } else if (nextAppState === 'active') {
+          console.log('App became active, sending immediate location update...');
+          sendImmediateLocationUpdate({
+            isAuto: true,
+            lat,
+            lng,
+            address,
+          });
+        }
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => subscription?.remove();
+  }, [isAutoMode, locationTrackingActive, lat, lng, address]);
 
   const handlePress = async (item: ItemProps) => {
     // console.log("Pressed:", item.name, "ID:", item.id);
@@ -166,6 +284,12 @@ export default function Overview({
             ios_backgroundColor="#E8EAE8"
           />
           <Text style={styles.switchLabel}>Auto</Text>
+          {isAutoMode && locationTrackingActive && (
+            <View style={styles.trackingIndicator}>
+              <View style={styles.trackingDot} />
+              <Text style={styles.trackingText}>Tracking</Text>
+            </View>
+          )}
         </View>
 
         {!isAutoMode && (
@@ -312,6 +436,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Fonts.SatoshiMedium,
     color: Colors.text.secondary,
+    fontWeight: 500,
+  },
+  trackingIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: "#E8F5E8",
+    borderRadius: 12,
+  },
+  trackingDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#4CAF50",
+    marginRight: 4,
+  },
+  trackingText: {
+    fontSize: 12,
+    fontFamily: Fonts.SatoshiMedium,
+    color: "#4CAF50",
     fontWeight: 500,
   },
   addButton: {
