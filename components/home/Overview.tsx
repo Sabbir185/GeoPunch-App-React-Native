@@ -157,15 +157,15 @@ export default function Overview({
       {/* Switch and Add Button Row */}
       <View style={styles.controlsRow}>
         <View style={styles.switchContainer}>
-          <Text style={styles.switchLabel}>Manual</Text>
-          <Switch
+          <Text style={styles.switchLabel}>Add New Place</Text>
+          {/* <Switch
             value={isAutoMode}
             onValueChange={setIsAutoMode}
             trackColor={{ false: Colors.primary, true: "#4CAF50" }}
             thumbColor={isAutoMode ? "#FFFFFF" : "#FFFFFF"}
             ios_backgroundColor="#E8EAE8"
           />
-          <Text style={styles.switchLabel}>Auto</Text>
+          <Text style={styles.switchLabel}>Auto</Text> */}
         </View>
 
         {!isAutoMode && (
