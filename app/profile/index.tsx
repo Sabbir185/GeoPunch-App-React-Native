@@ -52,6 +52,17 @@ const signUpSchema = z
     path: ["confirm_password"],
   });
 
+const FIELD_META: Record<
+  string,
+  { label: string; inputType: "text" | "email" | "phone" }
+> = {
+  name: { label: "Full Name", inputType: "text" },
+  email: { label: "Email", inputType: "email" },
+  phone: { label: "Phone Number", inputType: "phone" },
+  department: { label: "Department", inputType: "text" },
+  designation: { label: "Designation", inputType: "text" },
+};
+
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
 export default function ProfileUpdate() {
@@ -330,7 +341,7 @@ export default function ProfileUpdate() {
                           )}
                         />
                       }
-                      keyboardType="email-address"
+                      keyboardType="phone-pad"
                       autoCapitalize="none"
                       style={styles.input}
                       outlineColor={Colors.boarder}
@@ -338,8 +349,8 @@ export default function ProfileUpdate() {
                       editable={false}
                     />
                   </TouchableOpacity>
-                  {errors.email && (
-                    <Text style={styles.errorText}>{errors.email.message}</Text>
+                  {errors.phone && (
+                    <Text style={styles.errorText}>{errors.phone.message}</Text>
                   )}
                 </>
               )}
@@ -359,7 +370,7 @@ export default function ProfileUpdate() {
                     }}
                   >
                     <TextInput
-                      placeholder="example@email.com"
+                      placeholder="e.g. CSE"
                       value={value}
                       onChangeText={onChange}
                       mode="outlined"
@@ -374,7 +385,7 @@ export default function ProfileUpdate() {
                           )}
                         />
                       }
-                      autoCapitalize="none"
+                      autoCapitalize="words"
                       style={styles.input}
                       outlineColor={Colors.boarder}
                       activeOutlineColor={Colors.light}
@@ -390,7 +401,7 @@ export default function ProfileUpdate() {
               )}
             />
 
-            {/* Department Input */}
+            {/* Designation Input */}
             <Text style={styles.label}>Designation</Text>
             <Controller
               control={control}
@@ -404,7 +415,7 @@ export default function ProfileUpdate() {
                     }}
                   >
                     <TextInput
-                      placeholder="example@email.com"
+                      placeholder="e.g. Lecturer"
                       value={value}
                       onChangeText={onChange}
                       mode="outlined"
@@ -419,7 +430,7 @@ export default function ProfileUpdate() {
                           )}
                         />
                       }
-                      autoCapitalize="none"
+                      autoCapitalize="words"
                       style={styles.input}
                       outlineColor={Colors.boarder}
                       activeOutlineColor={Colors.light}
@@ -471,19 +482,9 @@ export default function ProfileUpdate() {
           onClose={() => setSelectedField(null)}
           fieldName={selectedField || ""}
           fieldValue={fieldValue}
-          label={
-            selectedField === "name"
-              ? "Full Name"
-              : selectedField === "email"
-              ? "Email"
-              : "Phone Number"
-          }
+          label={selectedField ? FIELD_META[selectedField]?.label || "" : ""}
           inputType={
-            selectedField === "email"
-              ? "email"
-              : selectedField === "phone"
-              ? "phone"
-              : "text"
+            selectedField ? FIELD_META[selectedField]?.inputType || "text" : "text"
           }
           setIsUpdated={setIsUpdated}
           isUpdated={isUpdated}

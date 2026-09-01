@@ -41,26 +41,30 @@ const EditFieldBottomSheet: React.FC<EditFieldBottomSheetProps> = ({
   }, [fieldValue]);
 
   const handleSave = async () => {
+    if (!fieldName) return;
     const payload: any = {};
     payload[fieldName] = value;
     try {
       setIsIndicator(true);
       const res = await updateProfile(payload);
-      if (res?.statusCode === 400) {
-        showToast("error", res?.message);
-      } else if (res?.statusCode === 401) {
-        showToast("error", res?.message);
-      } else {
-        showToast("success", res?.message || "Data updated successfully");
+      if (res?.status === 200 || res?.status === 201 || res?.statusCode === 200) {
+        showToast("success", res?.msg || res?.message || "Data updated successfully");
         await fetchUserProfile();
         setIsUpdated(!isUpdated);
         onClose();
+      } else {
+        showToast(
+          "error",
+          res?.msg || res?.message || "Failed to update, please try again."
+        );
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         showToast(
           "error",
-          error.response?.data?.message || "Failed to update, Please try again."
+          error.response?.data?.msg ||
+            error.response?.data?.message ||
+            "Failed to update, please try again."
         );
       } else {
         showToast("error", "An unexpected error occurred. Please try again.");
@@ -107,19 +111,22 @@ const EditFieldBottomSheet: React.FC<EditFieldBottomSheetProps> = ({
             <Button
               mode="outlined"
               onPress={onClose}
+              disabled={isIndicator}
               style={[styles.button, styles.cancelButton]}
               labelStyle={styles.cancelButtonText}
             >
               Cancel
             </Button>
-            {/* <Button
+            <Button
               mode="contained"
               onPress={handleSave}
+              loading={isIndicator}
+              disabled={isIndicator}
               style={[styles.button, styles.saveButton]}
               labelStyle={styles.saveButtonText}
             >
               Save
-            </Button> */}
+            </Button>
           </View>
         </View>
         {isIndicator && (
