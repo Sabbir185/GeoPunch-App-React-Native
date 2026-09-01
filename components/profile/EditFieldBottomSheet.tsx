@@ -38,17 +38,33 @@ const EditFieldBottomSheet: React.FC<EditFieldBottomSheetProps> = ({
 
   React.useEffect(() => {
     setValue(fieldValue);
-  }, [fieldValue]);
+  }, [fieldValue, visible]);
 
   const handleSave = async () => {
     if (!fieldName) return;
+    const trimmedValue = typeof value === "string" ? value.trim() : value;
+
+    if (inputType === "email" && trimmedValue) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(trimmedValue)) {
+        showToast("error", "Please enter a valid email address");
+        return;
+      }
+    }
+
+    if (inputType === "phone" && !trimmedValue) {
+      showToast("error", "Phone number cannot be empty");
+      return;
+    }
+
     const payload: any = {};
-    payload[fieldName] = value;
+    payload[fieldName] = trimmedValue;
     try {
       setIsIndicator(true);
       const res = await updateProfile(payload);
       if (res?.status === 200 || res?.status === 201 || res?.statusCode === 200) {
         showToast("success", res?.msg || res?.message || "Data updated successfully");
+        onSave(trimmedValue);
         await fetchUserProfile();
         setIsUpdated(!isUpdated);
         onClose();

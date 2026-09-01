@@ -82,6 +82,7 @@ export default function ProfileUpdate() {
     control,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -108,26 +109,29 @@ export default function ProfileUpdate() {
       setDateTime(user?.dateOfBirth ? dayjs(user?.dateOfBirth) : "");
       setImage(user?.image || "");
     }
-  }, [user?.id, isUpdated]);
+  }, [user, isUpdated]);
 
   const handleUpdate = async (payload: any) => {
     try {
       setIsIndicator(true);
       const res = await updateProfile(payload);
-      if (res?.status === 400) {
-        showToast("error", res?.msg);
-      } else if (res?.status === 401) {
-        showToast("error", res?.msg);
-      } else {
-        showToast("success", res?.msg || "Data updated successfully");
+      if (res?.status === 200 || res?.status === 201 || res?.statusCode === 200) {
+        showToast("success", res?.msg || res?.message || "Data updated successfully");
         await fetchUserProfile();
-        setIsUpdated(!isUpdated);
+        setIsUpdated((prev) => !prev);
+      } else {
+        showToast(
+          "error",
+          res?.msg || res?.message || "Failed to update, please try again."
+        );
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         showToast(
           "error",
-          error.response?.data?.message || "Failed to update, Please try again."
+          error.response?.data?.msg ||
+            error.response?.data?.message ||
+            "Failed to update, please try again."
         );
       } else {
         showToast("error", "An unexpected error occurred. Please try again.");
@@ -202,24 +206,21 @@ export default function ProfileUpdate() {
                   );
                   const result = await response.json();
                   if (result?.url) {
-                    handleUpdate({
-                      image:
-                        typeof result?.url === "string"
-                          ? result?.url
-                          : data?.assets[0]?.uri || "",
-                    });
-                    showToast(
-                      "success",
-                      result?.message || "Data updated successfully"
-                    );
-                    // await fetchUserProfile();
-                    setIsUpdated(!isUpdated);
+                    const imageUrl =
+                      typeof result?.url === "string"
+                        ? result?.url
+                        : data?.assets[0]?.uri || "";
+                    setImage(imageUrl);
+                    await handleUpdate({ image: imageUrl });
                   } else {
-                    showToast("error", result?.message);
+                    showToast(
+                      "error",
+                      result?.message || result?.error || "Failed to upload image"
+                    );
                   }
                 } catch (error) {
                   console.log(error);
-                  showToast("error", "Failed to upload, Please try again.");
+                  showToast("error", "Failed to upload, please try again.");
                 }
               }}
             />
@@ -237,7 +238,7 @@ export default function ProfileUpdate() {
                   <TouchableOpacity
                     onPress={() => {
                       setSelectedField("name");
-                      setFieldValue(value);
+                      setFieldValue(user?.name || value || "");
                     }}
                   >
                     <TextInput
@@ -279,7 +280,7 @@ export default function ProfileUpdate() {
                   <TouchableOpacity
                     onPress={() => {
                       setSelectedField("email");
-                      setFieldValue(value);
+                      setFieldValue(user?.email || value || "");
                     }}
                   >
                     <TextInput
@@ -322,7 +323,7 @@ export default function ProfileUpdate() {
                   <TouchableOpacity
                     onPress={() => {
                       setSelectedField("phone");
-                      setFieldValue(value);
+                      setFieldValue(user?.phone || value || "");
                     }}
                   >
                     <TextInput
@@ -366,7 +367,7 @@ export default function ProfileUpdate() {
                   <TouchableOpacity
                     onPress={() => {
                       setSelectedField("department");
-                      setFieldValue(value);
+                      setFieldValue(user?.department || value || "");
                     }}
                   >
                     <TextInput
@@ -411,7 +412,7 @@ export default function ProfileUpdate() {
                   <TouchableOpacity
                     onPress={() => {
                       setSelectedField("designation");
-                      setFieldValue(value);
+                      setFieldValue(user?.designation || value || "");
                     }}
                   >
                     <TextInput
@@ -482,6 +483,11 @@ export default function ProfileUpdate() {
           onClose={() => setSelectedField(null)}
           fieldName={selectedField || ""}
           fieldValue={fieldValue}
+          onSave={(val) => {
+            if (selectedField) {
+              setValue(selectedField as any, val);
+            }
+          }}
           label={selectedField ? FIELD_META[selectedField]?.label || "" : ""}
           inputType={
             selectedField ? FIELD_META[selectedField]?.inputType || "text" : "text"
