@@ -1,37 +1,100 @@
 import { Tabs } from "expo-router";
-import { Image, Text, View } from "react-native";
-import { Skeleton } from "@rneui/themed";
-import LoadingOverlay from "@/components/common/LoadingOverlay";
+import {
+  Image,
+  Text,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { images } from "@/constants/images";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import { useContext } from "react";
 import { UserContext } from "@/contexts/user";
 import Constants from "expo-constants";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 
-function TabIconItem({ focused, icon }: { focused: boolean; icon: any }) {
+const TAB_CONFIG: Record<string, { label: string; icon: any }> = {
+  index: {
+    label: "Home",
+    icon: images.home,
+  },
+  activity: {
+    label: "Activity",
+    icon: images.activities,
+  },
+  more: {
+    label: "More",
+    icon: images.more,
+  },
+};
+
+function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   return (
-    <View
-      style={{
-        width: 38,
-        height: 38,
-        borderRadius: 19,
-        backgroundColor: focused ? Colors.primary : "rgba(255, 255, 255, 0.08)",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 8,
-        shadowColor: focused ? Colors.primary : "transparent",
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: focused ? 0.35 : 0,
-        shadowRadius: 5,
-        elevation: focused ? 4 : 0,
-      }}
-    >
-      <Image
-        source={icon}
-        style={{ width: "100%", height: "100%" }}
-        tintColor={focused ? Colors.white : "#94A3B8"}
-      />
+    <View style={styles.tabBarContainer} pointerEvents="box-none">
+      <View style={styles.tabBar}>
+        {state.routes.map((route, index) => {
+          const isFocused = state.index === index;
+          const config = TAB_CONFIG[route.name];
+          if (!config) return null;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
+
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          const onLongPress = () => {
+            navigation.emit({
+              type: "tabLongPress",
+              target: route.key,
+            });
+          };
+
+          return (
+            <TouchableOpacity
+              key={route.key}
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={config.label}
+              testID={descriptors[route.key]?.options?.tabBarButtonTestID}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              activeOpacity={0.8}
+              style={styles.tabButton}
+            >
+              <View
+                style={[
+                  styles.iconCircle,
+                  isFocused && styles.iconCircleFocused,
+                ]}
+              >
+                <Image
+                  source={config.icon}
+                  style={styles.tabIcon}
+                  tintColor={isFocused ? Colors.white : "#94A3B8"}
+                />
+              </View>
+
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.tabLabel,
+                  isFocused && styles.tabLabelFocused,
+                ]}
+              >
+                {config.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 }
@@ -63,53 +126,15 @@ export default function TabsLayout() {
 
   return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
-        tabBarShowLabel: true,
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: "#94A3B8",
-        tabBarLabelStyle: {
-          fontFamily: Fonts.UrbanistBold,
-          fontSize: 11,
-          letterSpacing: 0.2,
-          marginTop: 2,
-        },
-        tabBarIconStyle: {
-          width: 38,
-          height: 38,
-        },
-        tabBarItemStyle: {
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-        },
-        tabBarStyle: {
-          backgroundColor: "#0F172A",
-          borderRadius: 40,
-          marginHorizontal: 20,
-          marginBottom: 20,
-          height: 72,
-          position: "absolute",
-          borderWidth: 1,
-          borderColor: "rgba(255, 255, 255, 0.12)",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 0.25,
-          shadowRadius: 20,
-          elevation: 10,
-          paddingTop: 8,
-          paddingBottom: 8,
-        },
+        headerShown: false,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          headerShown: false,
-          tabBarLabel: "Home",
-          tabBarIcon: ({ focused }) => (
-            <TabIconItem focused={focused} icon={images.home} />
-          ),
         }}
       />
 
@@ -117,11 +142,6 @@ export default function TabsLayout() {
         name="activity"
         options={{
           title: "Activity",
-          headerShown: false,
-          tabBarLabel: "Activity",
-          tabBarIcon: ({ focused }) => (
-            <TabIconItem focused={focused} icon={images.activities} />
-          ),
         }}
       />
 
@@ -129,13 +149,74 @@ export default function TabsLayout() {
         name="more"
         options={{
           title: "More",
-          headerShown: false,
-          tabBarLabel: "More",
-          tabBarIcon: ({ focused }) => (
-            <TabIconItem focused={focused} icon={images.more} />
-          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBarContainer: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    right: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabBar: {
+    flexDirection: "row",
+    backgroundColor: "#0F172A",
+    borderRadius: 36,
+    height: 70,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.12)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  tabButton: {
+    flex: 1,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 8,
+  },
+  iconCircleFocused: {
+    backgroundColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.4,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  tabIcon: {
+    width: "100%",
+    height: "100%",
+  },
+  tabLabel: {
+    fontFamily: Fonts.UrbanistBold,
+    fontSize: 11,
+    color: "#94A3B8",
+    textAlign: "center",
+    marginTop: 3,
+    letterSpacing: 0.2,
+  },
+  tabLabelFocused: {
+    color: Colors.primary,
+  },
+});
