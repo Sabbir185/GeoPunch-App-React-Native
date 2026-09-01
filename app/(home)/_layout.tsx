@@ -9,51 +9,29 @@ import { useContext } from "react";
 import { UserContext } from "@/contexts/user";
 import Constants from "expo-constants";
 
-function TabIcon({ focused, icon, title }: any) {
+function TabIconItem({ focused, icon }: { focused: boolean; icon: any }) {
   return (
     <View
       style={{
-        flex: 1,
-        flexDirection: "column",
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: focused ? Colors.primary : "rgba(255, 255, 255, 0.08)",
         justifyContent: "center",
         alignItems: "center",
-        marginTop: 4,
+        padding: 8,
+        shadowColor: focused ? Colors.primary : "transparent",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: focused ? 0.35 : 0,
+        shadowRadius: 5,
+        elevation: focused ? 4 : 0,
       }}
     >
-      <View
-        style={{
-          width: 40,
-          height: 40,
-          borderRadius: 100,
-          backgroundColor: focused ? Colors.primary : "#FFFFFF1A",
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          overflow: "hidden",
-          padding: 10,
-        }}
-      >
-        <Image
-          source={icon}
-          style={{ width: "100%", height: "100%" }}
-          tintColor={Colors.white}
-        />
-      </View>
-
-      <View style={{ width: 100, height: "100%" }}>
-        <Text
-          style={{
-            fontFamily: Fonts.UrbanistSemibold,
-            fontWeight: 700,
-            fontSize: 12,
-            color: focused ? Colors.primary : Colors.white,
-            textAlign: "center",
-            marginTop: 3,
-          }}
-        >
-          {title}
-        </Text>
-      </View>
+      <Image
+        source={icon}
+        style={{ width: "100%", height: "100%" }}
+        tintColor={focused ? Colors.white : "#94A3B8"}
+      />
     </View>
   );
 }
@@ -67,6 +45,7 @@ export default function TabsLayout() {
         style={{
           flex: 1,
           flexDirection: "column",
+          backgroundColor: "#F8FAFC",
           margin: 20,
           gap: 20,
           marginTop: Constants.statusBarHeight,
@@ -76,7 +55,7 @@ export default function TabsLayout() {
       >
         <Image
           source={require("../../assets/logo/geoLogo.png")}
-          style={{ width: 200, height: 200, alignSelf: "center" }}
+          style={{ width: 180, height: 180, alignSelf: "center" }}
         />
       </View>
     );
@@ -85,34 +64,51 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: Colors.primary,
+        tabBarInactiveTintColor: "#94A3B8",
+        tabBarLabelStyle: {
+          fontFamily: Fonts.UrbanistBold,
+          fontSize: 11,
+          letterSpacing: 0.2,
+          marginTop: 2,
+        },
+        tabBarIconStyle: {
+          width: 38,
+          height: 38,
+        },
         tabBarItemStyle: {
-          width: "100%",
-          height: "100%",
-          flexDirection: "row",
+          flex: 1,
           justifyContent: "center",
           alignItems: "center",
         },
         tabBarStyle: {
-          backgroundColor: "#121A1C",
-          borderRadius: 50,
+          backgroundColor: "#0F172A",
+          borderRadius: 40,
           marginHorizontal: 20,
           marginBottom: 20,
-          height: 80,
+          height: 72,
           position: "absolute",
-          overflow: "hidden",
           borderWidth: 1,
-          borderColor: "#121A1C",
+          borderColor: "rgba(255, 255, 255, 0.12)",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: 0.25,
+          shadowRadius: 20,
+          elevation: 10,
+          paddingTop: 8,
+          paddingBottom: 8,
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "index",
+          title: "Home",
           headerShown: false,
+          tabBarLabel: "Home",
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={images.home} title="Home" />
+            <TabIconItem focused={focused} icon={images.home} />
           ),
         }}
       />
@@ -122,12 +118,9 @@ export default function TabsLayout() {
         options={{
           title: "Activity",
           headerShown: false,
+          tabBarLabel: "Activity",
           tabBarIcon: ({ focused }) => (
-            <TabIcon
-              focused={focused}
-              icon={images.activities}
-              title="Activity"
-            />
+            <TabIconItem focused={focused} icon={images.activities} />
           ),
         }}
       />
@@ -137,8 +130,9 @@ export default function TabsLayout() {
         options={{
           title: "More",
           headerShown: false,
+          tabBarLabel: "More",
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon={images.more} title="More" />
+            <TabIconItem focused={focused} icon={images.more} />
           ),
         }}
       />

@@ -107,50 +107,46 @@ export default function CheckInOutButton({
     <View style={styles.container}>
       {/* Check In Button */}
       <TouchableOpacity
+        activeOpacity={0.85}
         style={[
           styles.button,
-          {
-            backgroundColor: isCheckedIn
-              ? Colors.button.disbale
-              : Colors.primary,
-            opacity: isCheckedIn ? 0.6 : 1,
-          },
+          isCheckedIn ? styles.buttonDisabled : styles.buttonCheckIn,
         ]}
         onPress={onCheckIn}
         disabled={isCheckedIn || isLoading}
       >
-        <Text
-          style={[
-            styles.buttonText,
-            { color: isCheckedIn ? Colors.text.tertiary : Colors.white },
-          ]}
-        >
-          {isLoading ? "Loading..." : "Check In"}
-        </Text>
+        <View style={styles.buttonInner}>
+          <Text
+            style={[
+              styles.buttonText,
+              isCheckedIn ? styles.buttonTextDisabled : styles.buttonTextActive,
+            ]}
+          >
+            {isLoading ? "Please wait..." : isCheckedIn ? "✓ Checked In" : "Check In"}
+          </Text>
+        </View>
       </TouchableOpacity>
 
       {/* Check Out Button */}
       <TouchableOpacity
+        activeOpacity={0.85}
         style={[
           styles.button,
-          {
-            backgroundColor: !isCheckedIn
-              ? Colors.button.disbale
-              : Colors.secondary,
-            opacity: !isCheckedIn ? 0.6 : 1,
-          },
+          !isCheckedIn ? styles.buttonDisabled : styles.buttonCheckOut,
         ]}
         onPress={onCheckOut}
         disabled={!isCheckedIn || isLoading}
       >
-        <Text
-          style={[
-            styles.buttonText,
-            { color: !isCheckedIn ? Colors.text.tertiary : Colors.white },
-          ]}
-        >
-          {isLoading ? "Loading..." : "Check Out"}
-        </Text>
+        <View style={styles.buttonInner}>
+          <Text
+            style={[
+              styles.buttonText,
+              !isCheckedIn ? styles.buttonTextDisabled : styles.buttonTextActive,
+            ]}
+          >
+            {isLoading ? "Please wait..." : "Check Out"}
+          </Text>
+        </View>
       </TouchableOpacity>
     </View>
   );
@@ -161,24 +157,54 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    gap: 15,
+    marginTop: 8,
+    gap: 12,
   },
   button: {
     flex: 1,
-    backgroundColor: Colors.primary,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 50,
+    minHeight: 52,
+  },
+  buttonCheckIn: {
+    backgroundColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  buttonCheckOut: {
+    backgroundColor: "#0F172A",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  buttonDisabled: {
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    borderWidth: 1,
+    borderColor: "rgba(15, 23, 42, 0.08)",
+  },
+  buttonInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
   },
   buttonText: {
+    fontSize: 15,
+    fontFamily: Fonts.UrbanistBold,
+    letterSpacing: 0.2,
+  },
+  buttonTextActive: {
     color: Colors.white,
-    fontSize: 16,
-    fontFamily: Fonts.SatoshiMedium,
-    fontWeight: "600",
+  },
+  buttonTextDisabled: {
+    color: "#94A3B8",
   },
 });

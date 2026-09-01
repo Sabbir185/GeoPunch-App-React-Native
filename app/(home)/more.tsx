@@ -12,7 +12,11 @@ export default function More() {
   const { logout, user } = useContext(UserContext);
 
   return (
-    <ScrollView style={{ flex: 1, maxHeight: "100%" }}>
+    <ScrollView
+      style={{ flex: 1, maxHeight: "100%", backgroundColor: "#F8FAFC" }}
+      contentContainerStyle={{ paddingBottom: 120 }}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.container}>
         <View>
           <Text style={styles.title}>More</Text>
@@ -23,7 +27,7 @@ export default function More() {
               image={user?.image}
               email={user?.email || "--"}
               nameTitleSize={20}
-              imgSize={70}
+              imgSize={64}
             />
           </View>
 
@@ -58,6 +62,7 @@ export default function More() {
                 marginTop: 30,
                 width: 200,
                 height: 50,
+                borderRadius: 14,
               },
               title: {
                 color: Colors.white,
@@ -75,26 +80,30 @@ export default function More() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingTop: 80,
     padding: 20,
-    backgroundColor: "#F4F9FF",
+    paddingTop: 64,
+    backgroundColor: "#F8FAFC",
     minHeight: "100%",
   },
   title: {
     fontFamily: Fonts.UrbanistBold,
-    fontSize: 20,
+    fontSize: 22,
+    color: "#0F172A",
     textAlign: "center",
   },
   profileContainer: {
-    marginTop: 40,
+    marginTop: 30,
     backgroundColor: "#FFFFFF",
-    borderRadius: 10,
-    padding: 10,
+    borderRadius: 16,
+    padding: 16,
     width: "100%",
-    height: 115,
     borderWidth: 1,
-    borderColor: Colors.boarder,
+    borderColor: "#E2E8F0",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
     flexDirection: "column",
     justifyContent: "center",
     paddingHorizontal: 20,

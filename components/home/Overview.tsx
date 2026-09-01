@@ -112,75 +112,90 @@ export default function Overview({
   };
 
   const renderButtons = (items: ItemProps[]) =>
-    items.map((item) => (
-      <TouchableOpacity
-        key={item.id}
-        style={[
-          styles.button,
-          {
-            backgroundColor:
-              user?.activityId === item.id ? Colors.primary : "#FFFFFF",
-          },
-        ]}
-        onPress={() => handlePress(item)}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-          <Text
-            style={[
-              styles.buttonText,
-              {
-                color:
-                  user?.activityId === item.id
-                    ? "#ffffff"
-                    : Colors.text.primary,
-              },
-            ]}
-          >
-            {item.name}
-          </Text>
-          {activityLoader && currentId === item.id && (
-            <ActivityIndicator size="small" />
-          )}
-        </View>
-      </TouchableOpacity>
-    ));
+    items.map((item) => {
+      const isSelected = user?.activityId === item.id;
+      const isLoadingThis = activityLoader && currentId === item.id;
+
+      return (
+        <TouchableOpacity
+          key={item.id}
+          activeOpacity={0.75}
+          style={[
+            styles.button,
+            isSelected ? styles.buttonSelected : styles.buttonUnselected,
+          ]}
+          onPress={() => handlePress(item)}
+        >
+          <View style={styles.buttonContent}>
+            {isSelected && !isLoadingThis && (
+              <View style={styles.selectedDot}>
+                <Text style={styles.checkIcon}>✓</Text>
+              </View>
+            )}
+            <Text
+              style={[
+                styles.buttonText,
+                isSelected ? styles.buttonTextSelected : styles.buttonTextUnselected,
+              ]}
+            >
+              {item.name}
+            </Text>
+            {isLoadingThis && (
+              <ActivityIndicator
+                size="small"
+                color={isSelected ? "#FFFFFF" : Colors.primary}
+                style={{ marginLeft: 4 }}
+              />
+            )}
+          </View>
+        </TouchableOpacity>
+      );
+    });
 
   if (mostUsedItems?.length === 0 || additionalItems?.length === 0) {
     return <LoadingOverlay message="Checking in..." />;
   }
 
+  // Find current active place name
+  const currentActivePlace =
+    [...mostUsedItems, ...additionalItems].find(
+      (item) => item.id === user?.activityId
+    )?.name;
+
   return (
     <View style={styles.container}>
-      {/* Title */}
-      <Text style={styles.title}>Place Of Presence</Text>
-
-      {/* Switch and Add Button Row */}
-      <View style={styles.controlsRow}>
-        <View style={styles.switchContainer}>
-          <Text style={styles.switchLabel}>Add New Place</Text>
-          {/* <Switch
-            value={isAutoMode}
-            onValueChange={setIsAutoMode}
-            trackColor={{ false: Colors.primary, true: "#4CAF50" }}
-            thumbColor={isAutoMode ? "#FFFFFF" : "#FFFFFF"}
-            ios_backgroundColor="#E8EAE8"
-          />
-          <Text style={styles.switchLabel}>Auto</Text> */}
+      {/* Section Header Row */}
+      <View style={styles.headerRow}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.title}>Place of Presence</Text>
+          <Text style={styles.subtitle}>Select your active workspace</Text>
         </View>
 
-        {!isAutoMode && (
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={styles.addButtonText}>+</Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={styles.addPlaceBtn}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={styles.addPlacePlus}>+</Text>
+          <Text style={styles.addPlaceText}>Add Place</Text>
+        </TouchableOpacity>
       </View>
+
+      {/* Active Place Pill Banner (if any) */}
+      {currentActivePlace && (
+        <View style={styles.activeBanner}>
+          <View style={styles.activeBannerPulse} />
+          <Text style={styles.activeBannerLabel}>Currently at:</Text>
+          <Text style={styles.activeBannerValue}>{currentActivePlace}</Text>
+        </View>
+      )}
 
       {/* Most Used Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Most Used</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionIcon}>🔥</Text>
+          <Text style={styles.sectionTitle}>Frequently Visited</Text>
+        </View>
         <View style={styles.buttonsContainer}>
           {renderButtons(mostUsedItems)}
         </View>
@@ -188,7 +203,10 @@ export default function Overview({
 
       {/* Additional Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Additional</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionIcon}>📍</Text>
+          <Text style={styles.sectionTitle}>Additional Areas</Text>
+        </View>
         <View style={styles.buttonsContainer}>
           {renderButtons(additionalItems)}
         </View>
@@ -196,7 +214,7 @@ export default function Overview({
 
       {/* Add Place Modal */}
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
@@ -211,13 +229,13 @@ export default function Overview({
                 style={styles.textInput}
                 value={newPlaceName}
                 onChangeText={setNewPlaceName}
-                placeholder="Enter place name"
+                placeholder="e.g. Lab 3, Conference Room"
                 placeholderTextColor={Colors.text.tertiary}
               />
             </View>
 
             <View style={styles.formField}>
-              <Text style={styles.fieldLabel}>Type</Text>
+              <Text style={styles.fieldLabel}>Category</Text>
               <TouchableOpacity
                 style={styles.dropdown}
                 onPress={() => setDropdownVisible(!dropdownVisible)}
@@ -238,7 +256,7 @@ export default function Overview({
                     <Text
                       style={[styles.dropdownOptionText, styles.mostUsedText]}
                     >
-                      Most Used
+                      Frequently Visited (Most Used)
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -251,7 +269,7 @@ export default function Overview({
                     <Text
                       style={[styles.dropdownOptionText, styles.additionalText]}
                     >
-                      Additional
+                      Additional Area
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -273,7 +291,7 @@ export default function Overview({
                 {addPlaceLoading ? (
                   <ActivityIndicator size="small" color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.addModalButtonText}>Add Place</Text>
+                  <Text style={styles.addModalButtonText}>Save Place</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -287,95 +305,159 @@ export default function Overview({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginTop: 10,
-    padding: 20,
+    marginTop: 18,
+    paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 24,
-    fontFamily: Fonts.UrbanistSemibold,
-    color: Colors.text.primary,
-    fontWeight: 700,
-    marginBottom: 16,
-  },
-  controlsRow: {
+  headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 16,
   },
-  switchContainer: {
+  title: {
+    fontSize: 20,
+    fontFamily: Fonts.UrbanistBold,
+    color: "#0F172A",
+    letterSpacing: -0.3,
+  },
+  subtitle: {
+    fontSize: 13,
+    fontFamily: Fonts.SatoshiMedium,
+    color: "#64748B",
+    marginTop: 2,
+  },
+  addPlaceBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#FFF1EB",
+    borderWidth: 1,
+    borderColor: "#FED7AA",
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 20,
+  },
+  addPlacePlus: {
+    fontSize: 16,
+    color: Colors.primary,
+    fontFamily: Fonts.UrbanistBold,
+    lineHeight: 18,
+  },
+  addPlaceText: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontFamily: Fonts.UrbanistBold,
+  },
+  activeBanner: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    backgroundColor: "#EFF6FF",
+    borderWidth: 1,
+    borderColor: "#BFDBFE",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 20,
   },
-  switchLabel: {
-    fontSize: 14,
+  activeBannerPulse: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#3B82F6",
+  },
+  activeBannerLabel: {
+    fontSize: 12,
     fontFamily: Fonts.SatoshiMedium,
-    color: Colors.text.secondary,
-    fontWeight: 500,
+    color: "#475569",
   },
-  addButton: {
-    backgroundColor: Colors.primary,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  addButtonText: {
-    fontSize: 22,
-    color: "#FFFFFF",
-    fontFamily: Fonts.UrbanistSemibold,
-    fontWeight: 600,
-    textAlign: "center",
-    lineHeight: 22,
-    includeFontPadding: false,
-    textAlignVertical: "center",
-    marginTop: 1,
+  activeBannerValue: {
+    fontSize: 13,
+    fontFamily: Fonts.UrbanistBold,
+    color: "#1D4ED8",
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 22,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 12,
+  },
+  sectionIcon: {
+    fontSize: 14,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontFamily: Fonts.SatoshiMedium,
-    color: Colors.text.secondary,
-    fontWeight: 600,
-    marginBottom: 16,
-    opacity: 0.8,
+    fontSize: 13,
+    fontFamily: Fonts.UrbanistBold,
+    color: "#64748B",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
   },
   buttonsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
-    justifyContent: "flex-start",
+    gap: 10,
     alignItems: "center",
   },
   button: {
-    backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#F0F0F0",
-    minWidth: 80,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+  },
+  buttonSelected: {
+    backgroundColor: Colors.primary,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  buttonUnselected: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
     elevation: 1,
   },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  selectedDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkIcon: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "bold",
+    lineHeight: 12,
+  },
   buttonText: {
-    fontSize: 15,
+    fontSize: 14,
+    letterSpacing: -0.2,
+  },
+  buttonTextSelected: {
+    color: "#FFFFFF",
+    fontFamily: Fonts.UrbanistBold,
+  },
+  buttonTextUnselected: {
+    color: "#334155",
     fontFamily: Fonts.UrbanistSemibold,
-    color: Colors.text.primary,
-    textAlign: "center",
-    fontWeight: 500,
   },
   // Modal styles
   modalOverlay: {

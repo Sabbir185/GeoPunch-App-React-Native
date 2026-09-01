@@ -38,8 +38,19 @@ export default function RootLayout() {
     return null;
   }
 
+  const GeoPunchTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: "#F8FAFC",
+      card: "#FFFFFF",
+      text: "#0F172A",
+      border: "#E2E8F0",
+    },
+  };
+
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={GeoPunchTheme}>
       <LocationProvider>
         <UserProvider>
           <Stack screenOptions={{ headerShown: false }}>
