@@ -117,7 +117,7 @@ export default function TabsLayout() {
         }}
       >
         <Image
-          source={require("../../assets/logo/geoLogo.png")}
+          source={require("../../assets/logo/gpi-logo-3d.png")}
           style={{ width: 180, height: 180, alignSelf: "center" }}
         />
       </View>

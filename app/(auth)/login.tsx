@@ -27,12 +27,12 @@ export default function Login() {
             <View style={styles.logoContainer}>
               <View style={styles.imageContainer}>
                 <Image
-                  source={require("../../assets/logo/geoLogo.png")}
+                  source={require("../../assets/logo/gpi-logo-3d.png")}
                   style={styles.logo}
                 />
               </View>
               {/* <View>
-                <Text style={styles.logoTest}>GeoPunch</Text>
+                <Text style={styles.logoTest}>GPI Connect</Text>
               </View> */}
             </View>
 

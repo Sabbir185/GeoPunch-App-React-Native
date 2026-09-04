@@ -38,7 +38,7 @@ export default function RootLayout() {
     return null;
   }
 
-  const GeoPunchTheme = {
+  const GPIConnectTheme = {
     ...DefaultTheme,
     colors: {
       ...DefaultTheme.colors,
@@ -50,7 +50,7 @@ export default function RootLayout() {
   };
 
   return (
-    <ThemeProvider value={GeoPunchTheme}>
+    <ThemeProvider value={GPIConnectTheme}>
       <LocationProvider>
         <UserProvider>
           <Stack screenOptions={{ headerShown: false }}>
