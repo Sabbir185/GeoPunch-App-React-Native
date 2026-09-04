@@ -64,18 +64,30 @@ const LoginForm: React.FC = () => {
         return;
       }
 
-      if (res?.data?.data?.accessToken) {
+      const accessToken =
+        res?.data?.data?.accessToken || res?.data?.accessToken;
+
+      if (accessToken) {
         try {
-          await AsyncStorage.setItem("token", res?.data?.data?.accessToken);
+          await AsyncStorage.setItem("token", accessToken);
+          const userData = res?.data?.data?.user || res?.data?.user;
+          if (userData) {
+            await AsyncStorage.setItem("user", JSON.stringify(userData));
+          }
+          await fetchUserProfile(accessToken);
           showToast("success", "Login successful!");
-          await fetchUserProfile();
-          router.push("/(home)");
+          router.replace("/(home)");
         } catch (e) {
           showToast(
             "error",
             res?.data?.msg || "Login failed. Please try again."
           );
         }
+      } else {
+        showToast(
+          "error",
+          res?.data?.msg || "Login failed. Please check your credentials."
+        );
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {

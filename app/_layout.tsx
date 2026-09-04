@@ -7,14 +7,31 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import Toast from "react-native-toast-message";
-import { UserProvider } from "@/contexts/user";
+import { UserContext, UserProvider } from "@/contexts/user";
 import { LocationProvider } from "@/contexts/LocationContext";
 
 SplashScreen.preventAutoHideAsync();
+
+function NavigationTree({ fontsLoaded }: { fontsLoaded: boolean }) {
+  const { isLoading } = useContext(UserContext);
+
+  useEffect(() => {
+    if (fontsLoaded && !isLoading) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, isLoading]);
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(home)" options={{ title: "Home" }} />
+      <Stack.Screen name="+not-found" />
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -27,12 +44,6 @@ export default function RootLayout() {
     SatoshiRegular: require("../assets/fonts/Satoshi-Regular.otf"),
     SatoshiMedium: require("../assets/fonts/Satoshi-Medium.otf"),
   });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
 
   if (!loaded) {
     return null;
@@ -53,10 +64,7 @@ export default function RootLayout() {
     <ThemeProvider value={GPIConnectTheme}>
       <LocationProvider>
         <UserProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(home)" options={{ title: "Home" }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
+          <NavigationTree fontsLoaded={loaded} />
         </UserProvider>
       </LocationProvider>
       <StatusBar style="dark" />

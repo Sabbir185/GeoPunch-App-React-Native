@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import {
   Image,
   Text,
@@ -9,7 +9,7 @@ import {
 import { images } from "@/constants/images";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { UserContext } from "@/contexts/user";
 import Constants from "expo-constants";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
@@ -107,9 +107,16 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 }
 
 export default function TabsLayout() {
-  const { user, fetchUserProfile } = useContext(UserContext);
+  const { user, isLoading } = useContext(UserContext);
+  const router = useRouter();
 
-  if (!user) {
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace("/login");
+    }
+  }, [isLoading, user]);
+
+  if (isLoading || !user) {
     return (
       <View
         style={{
@@ -125,7 +132,7 @@ export default function TabsLayout() {
       >
         <Image
           source={require("../../assets/logo/gpi-logo-3d.png")}
-          style={{ width: 180, height: 180, alignSelf: "center" }}
+          style={{ width: 180, height: 180, alignSelf: "center", resizeMode: "contain" }}
         />
       </View>
     );

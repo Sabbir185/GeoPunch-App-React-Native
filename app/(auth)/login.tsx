@@ -8,15 +8,23 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { Colors } from "@/constants/Colors";
 import { Fonts } from "@/constants/Fonts";
 import LoginForm from "@/components/auth/LoginForm";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { UserContext } from "@/contexts/user";
 
 export default function Login() {
   const router = useRouter();
+  const { user, isLoading } = useContext(UserContext);
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace("/(home)");
+    }
+  }, [isLoading, user]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

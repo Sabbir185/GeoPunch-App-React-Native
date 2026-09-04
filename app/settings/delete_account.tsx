@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Colors } from "@/constants/Colors";
@@ -13,9 +13,11 @@ import { accountDeleteByToken } from "@/services/api.helper";
 import { showToast } from "@/services/toastConfig";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserContext } from "@/contexts/user";
 
 export default function DeleteAccount() {
   const router = useRouter();
+  const { logout } = useContext(UserContext);
   const [isModalVisible, setModalVisible] = useState(false);
   const [isIndicator, setIsIndicator] = useState(false);
 
@@ -171,10 +173,8 @@ export default function DeleteAccount() {
                   if (res?.status === 401) {
                     showToast("error", res?.msg);
                   } else {
-                    await AsyncStorage.removeItem("token");
-                    await AsyncStorage.removeItem("user");
                     setModalVisible(false);
-                    router.push("/login");
+                    await logout();
                   }
                 } catch (error) {
                   if (axios.isAxiosError(error)) {

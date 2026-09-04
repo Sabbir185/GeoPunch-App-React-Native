@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useRouter } from "expo-router";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Colors } from "@/constants/Colors";
@@ -23,6 +23,7 @@ import Modal from "react-native-modal";
 import { showToast } from "@/services/toastConfig";
 import { changePassword } from "@/services/api.helper";
 import axios from "axios";
+import { UserContext } from "@/contexts/user";
 
 const passwordChangedSchema = z
   .object({
@@ -45,7 +46,9 @@ type passwordChangedFormData = z.infer<typeof passwordChangedSchema>;
 
 export default function ChangePassword() {
   const router = useRouter();
+  const { logout } = useContext(UserContext);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isIndicator, setIsIndicator] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] =
@@ -360,10 +363,8 @@ export default function ChangePassword() {
             <Button
               title="Close"
               onPress={async () => {
-                await AsyncStorage.removeItem("token");
-                await AsyncStorage.removeItem("user");
                 setModalVisible(false);
-                router.push("/login");
+                await logout();
               }}
               button_style={{
                 btn: {
