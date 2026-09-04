@@ -51,7 +51,8 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/splash.png",
+          "image": "./assets/logo/gpi-logo-3d.png",
+          "imageWidth": 180,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }

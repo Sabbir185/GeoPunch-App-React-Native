@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     backgroundColor: "#F8FAFC",
-    paddingBottom: 120,
+    paddingBottom: 140,
   },
   headerCard: {
     width: "100%",

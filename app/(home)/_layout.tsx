@@ -13,6 +13,7 @@ import { useContext } from "react";
 import { UserContext } from "@/contexts/user";
 import Constants from "expo-constants";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TAB_CONFIG: Record<string, { label: string; icon: any }> = {
   index: {
@@ -30,8 +31,14 @@ const TAB_CONFIG: Record<string, { label: string; icon: any }> = {
 };
 
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const insets = useSafeAreaInsets();
+  const bottomOffset = Math.max(insets.bottom + 10, 20);
+
   return (
-    <View style={styles.tabBarContainer} pointerEvents="box-none">
+    <View
+      style={[styles.tabBarContainer, { bottom: bottomOffset }]}
+      pointerEvents="box-none"
+    >
       <View style={styles.tabBar}>
         {state.routes.map((route, index) => {
           const isFocused = state.index === index;
@@ -158,7 +165,6 @@ export default function TabsLayout() {
 const styles = StyleSheet.create({
   tabBarContainer: {
     position: "absolute",
-    bottom: 20,
     left: 20,
     right: 20,
     alignItems: "center",

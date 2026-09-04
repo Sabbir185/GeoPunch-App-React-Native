@@ -14,7 +14,7 @@ export default function More() {
   return (
     <ScrollView
       style={{ flex: 1, maxHeight: "100%", backgroundColor: "#F8FAFC" }}
-      contentContainerStyle={{ paddingBottom: 120 }}
+      contentContainerStyle={{ paddingBottom: 140 }}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.container}>

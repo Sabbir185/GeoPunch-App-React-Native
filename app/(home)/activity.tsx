@@ -203,7 +203,7 @@ export default function Activity() {
                 )}
                 showsVerticalScrollIndicator={false}
                 ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
-                contentContainerStyle={{ paddingTop: 10, paddingBottom: 135 }}
+                contentContainerStyle={{ paddingTop: 10, paddingBottom: 140 }}
                 refreshControl={
                   <RefreshControl
                     refreshing={refreshing}
